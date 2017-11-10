@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html ng-app="qr-invite">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="author" content="Uice Lu">
+		<meta name="renderer" content="webkit">
+
+		<title>微信邀请传播管理后台</title>
+		
+		<base href="/">
+
+	    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+
+		<script type="text/javascript">
+			var apiBase = '<%= htmlWebpackPlugin.options.apiBase %>';
+			var webSocketUrl = '<%= htmlWebpackPlugin.options.webSocketUrl %>';
+		</script>
+	</head>
+
+	<body ng-controller="NavController">
+		<div class="container" ng-controller="LoginController" ng-show="inLogin">
+			<div class="row">
+				<div class="col-md-4 col-md-offset-4">
+					<div class="login-panel panel panel-default">
+						<div class="panel-heading">
+							<h3 class="panel-title">请登录</h3>
+						</div>
+						<div class="panel-body">
+							<form role="form" method="post" ng-submit="login()">
+								<fieldset>
+									<div class="form-group">
+										<input class="form-control" placeholder="用户名" ng-model="username" type="text" autofocus>
+									</div>
+									<div class="form-group">
+										<input class="form-control" placeholder="密码" ng-model="password" type="password">
+									</div>
+									<!-- <div class="checkbox">
+										<label>
+											<input name="remember" type="checkbox" ng-model="remember">记住
+										</label>
+									</div> -->
+									<!-- Change this to a button or input when using this as a form -->
+									<button type="submit" class="btn btn-lg btn-success btn-block">登录</button>
+								</fieldset>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div id="wrapper" ng-show="!inLogin">
+			<!-- Navigation -->
+			<nav class="navbar navbar-default navbar-fixed-top" role="navigation" style="margin-bottom: 0">
+				<div class="navbar-header">
+					<button type="button" class="navbar-toggle"  ng-click="navIsCollapsed = !navIsCollapsed">
+						<span class="sr-only">导航</span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</button>
+					<span class="navbar-brand">微信邀请传播管理后台</span>
+				</div>
+				<!-- /.navbar-header -->
+
+				<ul class="nav navbar-top-links navbar-right">
+					<li class="dropdown" dropdown>
+						<a href="" class="dropdown-toggle" dropdown-toggle>
+							<i class="fa fa-user fa-fw"></i> {{ user.name }} <i class="fa fa-caret-down"></i>
+						</a>
+						<ul class="dropdown-menu dropdown-user" dropdown-menu>
+							<li><a ng-href="user/{{ user.id }}"><i class="fa fa-user fa-fw"></i> 个人资料</a>
+							<li><a ng-click="logout()"><i class="fa fa-sign-out fa-fw"></i> 登出</a>
+							</li>
+						</ul>
+						<!-- /.dropdown-user -->
+					</li>
+					<!-- /.dropdown -->
+				</ul>
+				<!-- /.navbar-top-links -->
+
+				<div class="navbar-default sidebar" role="navigation">
+					<div class="sidebar-nav navbar-collapse" collapse="navIsCollapsed">
+						<ul class="nav" id="side-menu">
+							<li class="sidebar-search">
+								<div class="input-group custom-search-form">
+									<input type="text" class="form-control" placeholder="搜索..." disabled="disabled">
+									<span class="input-group-btn">
+										<button class="btn btn-default" type="button" disabled="disabled">
+											<i class="fa fa-search"></i>
+										</button>
+									</span>
+								</div>
+								<!-- /input-group -->
+							</li>
+							<li>
+								<a href="dashboard"><i class="fa fa-dashboard fa-fw"></i> 统计</a>
+							</li>
+							<li ng-show="user.can('edit_event')">
+								<a href="post?type=event"><i class="fa fa-edit fa-fw"></i> 活动</a>
+							</li>
+							<li ng-show="user.can('edit_article')">
+								<a href="tag"><i class="fa fa-tag fa-fw"></i> 标签</a>
+							</li>
+							<li ng-show="user.can('edit_user')">
+								<a href="user"><i class="fa fa-user fa-fw"></i> 用户</a>
+							</li>
+							<li>
+								<a href="post?type=feedback"><i class="fa fa-comment fa-fw"></i> 反馈</a>
+							</li>
+							<li ng-show="user.can('list_message')">
+								<a href="message"><i class="fa fa-bullhorn fa-fw"></i> 消息</a>
+							</li>
+							<li ng-show="user.can('edit_task')">
+								<a href="task"><i class="fa fa-tasks fa-fw"></i> 任务</a>
+							</li>
+							<li ng-show="user.can('edit_config')">
+								<a href="config"><i class="fa fa-cogs fa-fw"></i> 配置</a>
+							</li>
+						</ul>
+					</div>
+					<!-- /.sidebar-collapse -->
+				</div>
+				<!-- /.navbar-static-side -->
+			</nav>
+
+			<div id="page-wrapper" ng-view></div>
+
+		</div>
+		<!-- /#wrapper -->
+
+		<div class="alert-container" ng-controller="AlertController">
+			<alert ng-repeat="alert in alerts" type="{{alert.type}}" ng-mouseenter="toggleCloseButton($index)" ng-mouseleave="toggleCloseButton($index)">
+				<span class="actions" ng-if="alert.actions">
+					<a ng-repeat="action in $parent.alert.actions" ng-href="#" ng-click="action.action();close(alert.id)">{{ action.label }}</a>
+				</span>
+				<button ng-show="alert.closeable" type="button" class="close" ng-click="close(alert.id)">
+					<span aria-hidden="true">×</span>
+					<span class="sr-only">Close</span>
+				</button>
+				{{alert.msg}}
+			</alert>
+		</div>
+		
+	</body>
+
+</html>

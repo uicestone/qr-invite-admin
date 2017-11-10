@@ -1,0 +1,5 @@
+<a>
+	<span bind-html-unsafe="match.label | typeaheadHighlight:query"></span>
+	<small ng-show="match.model.is_fake" class="fa fa-bug"></small>
+	<small ng-show="match.model.is_specialist" class="fa fa-graduation-cap"></small>
+</a>

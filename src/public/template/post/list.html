@@ -1,0 +1,97 @@
+<div class="row">
+	<br>
+	<div class="col-sm-12">
+		<form class="form-inline" style="display:inline" ng-submit="location.search(queryArgs)">
+			<div class="form-group">
+				<div class="input-group">
+					<span class="input-group-addon">搜索</span>
+					<span class="search-clear fa fa-close" ng-click="location.search('keyword', null)" ng-show="queryArgs.keyword" style="right:10px"></span>
+					<input type="text" class="form-control input-sm" ng-model="queryArgs.keyword" placeholder="标题...">
+				</div>
+			</div>
+			<div class="form-group" style="position:relative">
+				<span class="search-clear fa fa-close" ng-click="location.search('content', null)" ng-show="queryArgs.content" style="right:10px"></span>
+				<input type="text" class="form-control input-sm" ng-model="queryArgs.content" placeholder="内容...">
+			</div>
+			<div class="form-group" style="position:relative">
+				<div class="input-group">
+					<span class="search-clear fa fa-close" ng-click="location.search('author_id', null)" ng-show="queryArgs.author_id"></span>
+					<input type="text" class="form-control input-sm" ng-model="queryAuthor" placeholder="作者..." typeahead="author as author.name for author in searchUser($viewValue)" typeahead-on-select="queryArgs.author_id = queryAuthor.id" typeahead-template-url="template/user/autocomplete.html" style="width:80px">
+					<span class="input-group-btn">
+						<button class="btn btn-default btn-sm" type="submit">
+							<i class="fa fa-search"></i>
+						</button>
+					</span>
+				</div>
+			</div>
+			<div class="form-group">
+				<input type="text" class="form-control input-sm" ng-model="newFilterTag" placeholder="标签..." typeahead="tag.name as tag.name for tag in searchTag($viewValue)" typeahead-template-url="template/tag/autocomplete.html" typeahead-on-select="filterTag($item)" style="width:80px">
+			</div>
+		</form>
+		<a ng-href="post/new?type={{queryArgs.type}}" class="btn btn-primary btn-sm pull-left" style="margin-right:5px">添加</a>
+	</div>
+	<div class="col-sm-12">
+		<div class="paginator text-right">
+			<span class="label label-info" ng-repeat="tag in queryTags" ng-click="clearTag(tag)" style="margin-right:3px">{{ tag }}</span>
+			<button title="未发布" class="btn btn-default fa fa-file-text-o" ng-class="{active:queryArgs.published === false}" ng-click="togglePublished()"></button>
+			<button title="智能排序" class="btn btn-default fa fa-filter" ng-class="{active:queryArgs.order === 'selected'}" ng-click="toggleSelected()"></button>
+			<button title="只显示真实用户" class="btn btn-default fa fa-bug" ng-class="{active:queryArgs.user_is_fake !== undefined}" ng-click="toggleFake()"></button>
+			<button title="没有回复" class="btn btn-default fa fa-comment" ng-class="{active:queryArgs.replied !== undefined}" ng-click="toggleReplied()"></button>
+			<button title="显示详情" class="btn btn-default fa fa-file-text" ng-class="{active:showContentDetail}" ng-click="toggleContentDetail()"></button>
+			<button class="btn btn-default fa fa-refresh" ng-click="refresh()"></button>
+			{{ itemsStart }} - {{ itemsEnd }} / {{ itemsTotal }}
+			<button class="btn btn-default fa fa-chevron-left" ng-click="previousPage()" ng-disabled="!currentPage || currentPage === 1"></button>
+			<button class="btn btn-default fa fa-chevron-right" ng-click="nextPage()" ng-disabled="itemsEnd >= itemsTotal"></button>
+		</div>
+	</div>
+</div>
+<hr>
+<div class="row">
+	<div class="col-sm-12">
+		<table class="table table-striped table-hover">
+			<thead>
+				<tr>
+					<th style="width:70px">ID</th>
+					<th ng-show="!queryArgs.type || queryArgs.type.match(',').length" style="width:50px">类型</th>
+					<th ng-show="queryArgs.type | in:['event','course','article','lesson','insight','topic','question','magic','audio','video','partial']">标题</th>
+					<th ng-show="queryArgs.type | in:['answer','discussion','record','comment','feedback']">内容</th>
+					<th style="width:10%">作者</th>
+					<th style="width:150px" ng-mouseenter="hoverField('created_at')" ng-mouseleave="hoverField()">时间 <i class="fa" ng-click="setOrder('created_at', 'desc')" ng-show="orderBy === 'created_at' || hoveredField === 'created_at'" ng-class="{'fa-sort-asc':order === 'asc', 'fa-sort-desc':order === undefined || order === 'desc'}"></i></th>
+					<th ng-show="queryArgs.type !== 'comment'" style="width:12%">标签</th>
+					<th ng-show="queryArgs.ytpe | in:['course']">价格</th>
+					<th style="width:50px" ng-show="queryArgs.type | in:['event','course','article','lesson','insight','topic','question','magic','question','answer','discussion','record']" ng-mouseenter="hoverField('views')" ng-mouseleave="hoverField()">阅 <i class="fa" ng-click="setOrder('views', 'desc')" ng-show="orderBy === 'views' || hoveredField === 'views'" ng-class="{'fa-sort-asc':order === 'asc', 'fa-sort-desc':order === undefined || order === 'desc'}"></i></th>
+					<th style="width:50px" ng-show="queryArgs.type | in:['event','course','article','lesson','insight','topic','question','magic','question','answer','discussion','record','comment']" ng-mouseenter="hoverField('likes')" ng-mouseleave="hoverField()">赞 <i class="fa" ng-click="setOrder('likes', 'desc')" ng-show="orderBy === 'likes' || hoveredField === 'likes'" ng-class="{'fa-sort-asc':order === 'asc', 'fa-sort-desc':order === undefined || order === 'desc'}"></i></th>
+					<th style="width:50px" ng-show="queryArgs.type | in:['event','course','article','lesson','insight','topic','question','magic','question','answer','discussion','record']" ng-mouseenter="hoverField('reposts')" ng-mouseleave="hoverField()">转 <i class="fa" ng-click="setOrder('reposts', 'desc')" ng-show="orderBy === 'reposts' || hoveredField === 'reposts'" ng-class="{'fa-sort-asc':order === 'asc', 'fa-sort-desc':order === undefined || order === 'desc'}"></i></th>
+					<th style="width:50px" ng-show="queryArgs.type | in:['event','course','article','lesson','insight','topic','question','magic','question','answer','discussion','record']" ng-mouseenter="hoverField('comments_count')" ng-mouseleave="hoverField()">评 <i class="fa" ng-click="setOrder('comments_count', 'desc')" ng-show="orderBy === 'comments_count' || hoveredField === 'comments_count'" ng-class="{'fa-sort-asc':order === 'asc', 'fa-sort-desc':order === undefined || order === 'desc'}"></i></th>
+					<th style="width:50px" ng-mouseenter="hoverField('weight')" ng-mouseleave="hoverField()">权 <i class="fa" ng-click="setOrder('weight', 'desc')" ng-show="orderBy === 'weight' || hoveredField === 'weight'" ng-class="{'fa-sort-asc':order === 'asc', 'fa-sort-desc':order === undefined || order === 'desc'}"></i></th>
+					<th ng-show="queryArgs.type | in:['comment','question','answer','discussion','image','audio','record','article','lesson','insight']">上级内容</th>
+					<th ng-show="queryArgs.trashed === '1'" style="width:125px"></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr ng-repeat="post in posts" ng-click="editPost(post, $event)">
+					<td>{{ post.id }}</td>
+					<td ng-show="!queryArgs.type || queryArgs.type.match(',').length">{{ post.type_label }}</td>
+					<td ng-show="queryArgs.type | in:['event','course','article','lesson','insight','topic','question','magic','audio','video','partial']" ng-class="{'ellipsis':!showContentDetail}">{{ post.title }}</td>
+					<td ng-show="queryArgs.type | in:['answer','discussion','record','comment','feedback']" title="{{ post.content | htmlToPlain }}" ng-class="{'ellipsis':!showContentDetail}">{{ post.content | htmlToPlain }}</td>
+					<td><a ng-href="user/{{ post.author.id }}" ng-click="$event.stopPropagation()">{{ post.author.name }}</a></td>
+					<td>{{ post.created_at }}</td>
+					<td ng-show="queryArgs.type !== 'comment'">
+						<span class="label" ng-repeat="tag in post.tags" ng-click="filterTag(tag, $event)" ng-class="{'label-default':tag.is_hidden, 'label-info':!tag.is_hidden}" style="margin-right:3px;display:inline-block">{{ tag.name }}</span>
+					</td>
+					<td ng-show="queryArgs.type | in:['course']">{{ post.price }}</td>
+					<td ng-show="queryArgs.type | in:['event','course','article','lesson','insight','topic','question','magic','question','answer','discussion','record']">{{ post.views }}</td>
+					<td ng-show="queryArgs.type | in:['event','course','article','lesson','insight','topic','question','magic','question','answer','discussion','record','comment']">{{ post.likes }}</td>
+					<td ng-show="queryArgs.type | in:['event','course','article','lesson','insight','topic','question','magic','question','answer','discussion','record']">{{ post.reposts }}</td>
+					<td ng-show="queryArgs.type | in:['event','course','article','lesson','insight','topic','question','magic','question','answer','discussion','record']">{{ post.comments_count }}</td>
+					<td>{{ post.weight }}</td>
+					<td ng-show="queryArgs.type | in:['comment','question','answer','discussion','image','audio','record','article','lesson','insight']" ng-class="{'ellipsis':!showContentDetail}"> <i class="fa fa-filter" ng-click="$event.stopPropagation();location.search('parent_id', post.parent.id)"></i> <a ng-href="post/{{ post.parent.id }}" ng-click="$event.stopPropagation()" title="{{ post.parent.title || post.parent.content | htmlToPlain | limitTo:30 }}"> <i class="fa fa-link" ng-show="post.parent"></i> {{ post.parent.title || post.parent.content | htmlToPlain | limitTo:30 }}</a></td>
+					<td ng-show="queryArgs.trashed === '1'">
+						<button class="btn btn-default btn-xs btn-primary" ng-click="restore(post, $event)"><i class="fa fa-recycle"></i> 恢复</button>
+						<button class="btn btn-default btn-xs btn-danger" ng-click="destroy(post, $event)"><i class="fa fa-remove"></i> 销毁</button>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>

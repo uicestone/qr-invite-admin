@@ -1,0 +1,209 @@
+<br>
+<div class="row">
+    <div class="col-lg-8">
+        <div class="col-md-6">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <div class="row">
+                        <div class="col-xs-3">
+                            <i class="fa fa-eye fa-5x"></i>
+                        </div>
+                        <div class="col-xs-9 text-right">
+                            <div class="huge">{{ overview.pgc_count | number }}</div>
+                            <div>PGC总数</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="panel panel-green">
+                <div class="panel-heading">
+                    <div class="row">
+                        <div class="col-xs-3">
+                            <i class="fa fa-group fa-5x"></i>
+                        </div>
+                        <div class="col-xs-9 text-right">
+                            <div class="huge">{{ overview.users_count | number }}</div>
+                            <div>用户总数</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="panel panel-yellow">
+                <div class="panel-heading">
+                    <div class="row">
+                        <div class="col-xs-3">
+                            <i class="fa fa-commenting-o fa-5x"></i>
+                        </div>
+                        <div class="col-xs-9 text-right">
+                            <div class="huge">{{ overview.ugc_count | number }}</div>
+                            <div>UGC总数</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="panel panel-red">
+                <div class="panel-heading">
+                    <div class="row">
+                        <div class="col-xs-3">
+                            <i class="fa fa-cny fa-5x"></i>
+                        </div>
+                        <div class="col-xs-9 text-right">
+                            <div class="huge">{{ overview.paid_amount | number:0 }}</div>
+                            <div>订单金额</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-12 text-right">
+            <div class="btn-group">
+                <button class="btn btn-default btn-lg" ng-class="{active:showingChart}" ng-click="showChart();showTable(false)">图</button>
+                <button class="btn btn-default btn-lg" ng-class="{active:showingTable}" ng-click="showTable();showChart(false)">表</button>
+            </div>
+        </div>
+        <div class="col-lg-12">
+            <h4>每日新增用户</h4>
+            <!-- 服务号粉丝 仅订阅号粉丝 未关注公众号的授权用户 -->
+            <canvas id="chart-new-users" class="chart chart-line" chart-data="chartNewUsersData" chart-labels="chartNewUsersLabels" chart-series="chartNewUsersSeries" chart-options="options" chart-dataset-override="datasetOverride" ng-show="showingChart"></canvas>
+            <table class="table table-striped table-hover" ng-show="showingTable">
+                <thead>
+                    <tr>
+                        <th>日期</th>
+                        <th ng-repeat="label in chartNewUsersSeries">{{ label }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="row in chartNewUsersData[0] track by $index">
+                        <td>{{ chartNewUsersLabels[$index] }}</td>
+                        <td ng-repeat="data in chartNewUsersData">{{ data[$parent.$index] }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>每日活跃用户</h4>
+            <!-- IP数 活跃注册用户 新用户 上周回访 上月回访 -->
+            <canvas id="chart-active-users" class="chart chart-line" chart-data="chartActiveUsersData" chart-labels="chartActiveUsersLabels" chart-series="chartActiveUsersSeries" chart-options="options" chart-dataset-override="datasetOverride" ng-show="showingChart"></canvas>
+            <table class="table table-striped table-hover" ng-show="showingTable">
+                <thead>
+                    <tr>
+                        <th>日期</th>
+                        <th ng-repeat="label in chartActiveUsersSeries">{{ label }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="row in chartActiveUsersData[0] track by $index">
+                        <td>{{ chartActiveUsersLabels[$index] }}</td>
+                        <td ng-repeat="data in chartActiveUsersData">{{ data[$parent.$index] }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>每日公众号事件</h4>
+            <!-- 每天每个公众号的关注 取关 净增 菜单 消息 -->
+            <canvas id="chart-mp-account-events" class="chart chart-line" chart-data="chartMpAccountEventsData" chart-labels="chartMpAccountEventsLabels" chart-series="chartMpAccountEventsSeries" chart-options="options" chart-dataset-override="datasetOverride" ng-show="showingChart"></canvas>
+            <table class="table table-striped table-hover" ng-show="showingTable">
+                <thead>
+                    <tr>
+                        <th>日期</th>
+                        <th ng-repeat="label in chartMpAccountEventsSeries">{{ label }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="row in chartMpAccountEventsData[0] track by $index">
+                        <td>{{ chartMpAccountEventsLabels[$index] }}</td>
+                        <td ng-repeat="data in chartMpAccountEventsData">{{ data[$parent.$index] }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>每日消息推送</h4>
+            <!-- 每天推送的消息数 打开数 可切换消息渠道 -->
+            <!-- <canvas id="chart-messages" class="chart chart-line" chart-data="chartMessagesData" chart-labels="chartMessagesLabels" chart-series="chartMessagesSeries" chart-options="options" chart-dataset-override="datasetOverride" ng-show="showingChart"></canvas> -->
+            <h4>每日交互数量</h4>
+            <!-- 点赞 分享 参与 关注 UGC -->
+            <canvas id="chart-interactions" class="chart chart-line" chart-data="chartInteractionsData" chart-labels="chartInteractionsLabels" chart-series="chartInteractionsSeries" chart-options="options" chart-dataset-override="datasetOverride" ng-show="showingChart"></canvas>
+            <table class="table table-striped table-hover" ng-show="showingTable">
+                <thead>
+                    <tr>
+                        <th>日期</th>
+                        <th ng-repeat="label in chartInteractionsSeries">{{ label }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="row in chartInteractionsData[0] track by $index">
+                        <td>{{ chartInteractionsLabels[$index] }}</td>
+                        <td ng-repeat="data in chartInteractionsData">{{ data[$parent.$index] }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>每日UGC数量</h4>
+            <!-- 评论 打卡 提问 回答 -->
+            <canvas id="chart-ugcs" class="chart chart-line" chart-data="chartUgcsData" chart-labels="chartUgcsLabels" chart-series="chartUgcsSeries" chart-options="options" chart-dataset-override="datasetOverride" ng-show="showingChart"></canvas>
+            <table class="table table-striped table-hover" ng-show="showingTable">
+                <thead>
+                    <tr>
+                        <th>日期</th>
+                        <th ng-repeat="label in chartUgcsSeries">{{ label }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="row in chartUgcsData[0] track by $index">
+                        <td>{{ chartUgcsLabels[$index] }}</td>
+                        <td ng-repeat="data in chartUgcsData">{{ data[$parent.$index] }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- <h4>日留存%</h4> -->
+            <!-- 新增用户 向后留存率 周视图 月视图 -->
+            <!-- <table class="table table-bordered table-hover table-striped">
+                <tbody>
+                    <tr ng-repeat="retention_day in retention">
+                        <th style="width:96px">{{ retention_day.date }}</th>
+                        <th>{{ retention_day.new_users }}</th>
+                        <td ng-repeat="retention_days in retention_day.retention">{{ retention_days.count / retention_day.new_users * 100 | number:1 }}%</td>
+                    </tr>
+                </tbody>
+            </table> -->
+
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <i class="fa fa-bell fa-fw"></i> 社区动态
+            </div>
+            <!-- /.panel-heading -->
+            <div class="panel-body">
+                <ul class="list-group">
+                    <li href="#" class="list-group-item ellipsis" ng-repeat="log in recent_logs">
+                        <i class="fa fa-list fa-fw" ng-show="log.action | match:'列表'"></i>
+                        <i class="fa fa-home fa-fw" ng-show="log.action | match:'首页'"></i>
+                        <i class="fa fa-file-text fa-fw" ng-show="log.action | match:'查看'"></i>
+                        <i class="fa fa-thumbs-up fa-fw" ng-show="log.action | match:'点赞'"></i>
+                        <i class="fa fa-share-square fa-fw" ng-show="log.action | match:'分享'"></i>
+                        <i class="fa fa-pencil-square fa-fw" ng-show="log.action | match:'更新'"></i>
+                        <i class="fa fa-trash fa-fw" ng-show="log.action | match:'删除'"></i>
+                        <i class="fa fa-comment fa-fw" ng-show="log.action | match:'发布'"></i>
+                        <i class="fa fa-weixin fa-fw" ng-show="log.action | match:'微信'"></i>
+                        <span ng-show="log.user_name">
+                            <a target="_blank" ng-href="http://qr-invite.qizhipeiyou.com/admin/user/{{ log.user_id }}" ng-show="log.user_id">{{ log.user_name }}</a>
+                            <span ng-show="!log.user_id">{{ log.user_name }}</span>
+                        </span>
+                        <span>{{ log.action }}</span>
+                        <span ng-show="log.post_title">{{ log.post_title }}</span>
+                        <span title="{{ log.post_title }}" ng-show="log.tag_name">{{ log.tag_name }}</span>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.panel-body -->
+        </div>
+    </div>
+</div>

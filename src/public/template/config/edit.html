@@ -1,0 +1,33 @@
+<div class="row">
+	<div class="col-sm-8">
+		<br>
+		<form class="form form-horizontal" ng-submit="save(config)" name="configForm">
+			<div class="form-group">
+				<label class="control-label col-sm-2">名称</label>
+				<div class="col-sm-10">
+					<input type="text" class="form-control" ng-model="config.key">
+				</div>
+			</div>
+			<div class="form-group" ng-class="{'has-error':configForm.configValue.$error.json}">
+				<label class="control-label col-sm-2">数值</label>
+				<div class="col-sm-10">
+					<textarea ng-change="valueChange()" rows="{{ config.value | lines }}" class="form-control" ng-model="config.value" name="configValue"></textarea>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="control-label col-sm-2">备注</label>
+				<div class="col-sm-10">
+					<textarea rows="7" class="form-control" ng-model="config.comments"></textarea>
+				</div>
+			</div>
+			<hr>
+			<div class="col-sm-offset-2">
+				<button type="submit" class="btn btn-primary">保存</button>
+				<button type="button" class="btn btn-default" ng-click="generateWeixinQr(config)">生成二维码</button>
+			</div>
+		</form>
+	</div>
+	<div class="col-sm-4">
+		<img ng-show="config.key | match:'^wx_qrscene_'" src="{{ config.value | parseJson | get:'url' }}" style="width:100%">
+	</div>
+</div>

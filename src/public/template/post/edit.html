@@ -1,0 +1,201 @@
+<div class="row">
+	<div class="col-sm-12">
+		<br>
+		<form class="row" ng-submit="save(post)">
+			<div class="col-sm-9 form form-horizontal">
+				<div class="form-group" ng-show="post.type !== 'comment'">
+					<input type="text" class="form-control" placeholder="标题" ng-model="post.title" ng-show="post.type !== 'comment'">
+				</div>
+				<div class="form-group" ng-show="post.type | in:['event','course','article','lesson','insight','topic','question','collage_theme','partial','magic']">
+					<input type="text" class="form-control" placeholder="编辑标题" ng-model="post.abbreviation" ng-show="post.type !== 'comment'">
+				</div>
+				<div class="form-group" ng-show="post.type | in:['event','course','article','lesson','insight','topic','question','answer','discussion','record','comment','collage_template','collage_theme','diary']">
+					<textarea class="form-control" ng-model="post.excerpt" rows="5" placeholder="摘要"></textarea>
+				</div>
+				<div class="form-group" ng-show="post.type | in:['event','course','article','lesson','insight','topic','partial','collage_template','collage_theme']">
+					<div text-angular ta-file-drop="uploadFileInContent" ng-model="post.content" placeholder="内容"></div>
+				</div>
+				<div class="form-group" ng-show="post.type | in:['question','answer','discussion','record','comment','diary','feedback','magic']">
+					<textarea rows="5" class="form-control" ng-model="post.content" placeholder="内容"></textarea>
+				</div>
+				<div class="form-group" ng-show="post.type | in:['article','lesson','image','poster','audio']" ngf-drop ng-model="file" ngf-drag-over-class="has-success">
+					<div class="input-group">
+						<input type="text" ng-model="post.url" class="form-control" placeholder="链接 http(s)://">
+						<div class="input-group-addon"><button class="btn btn-default" ngf-select ng-model="file">上传</button></div>
+					</div>
+					<img ng-if="post.type | in:['image','poster']" ng-show="post.url" ng-src="{{ post.url }}" ngf-select ng-model="file" style="max-width:100%;display:block;margin:5px auto 0;">
+					<audio controls ng-if="post.type | in:['audio','lesson']" ng-show="post.url" ng-src="{{ post.url }}" style="width:100%;margin-top:5px"></audio>
+				</div>
+				<div>
+					<table class="table table-hover table-stripped">
+						<tbody>
+							<tr ng-repeat="child in children" ng-click="editPost(child, $event)">
+								<td>{{ child.type_label }}</td>
+								<td>{{ child.title }}</td>
+								<td>{{ child.author.name }}</td>
+								<td>{{ child.created_at }}</td>
+							</tr>
+						</tbody>
+					</table>
+					<a ng-href="post?parent_id={{ post.id }}" ng-show="children.length" class="btn btn-default">下级内容</a>
+				</div>
+				<hr>
+				<div class="form-group" ng-repeat="meta in post.metas" ng-if="meta.value !== null">
+					<label class="control-label col-sm-2" style="word-break:break-all" ng-click="setNewKey(meta.key)">{{ meta.key }}</label>
+					<div class="col-sm-9">
+						<p class="form-control-static">
+							{{ meta.value }}
+							<i class="fa fa-close pull-right" ng-click="setMeta(meta.key, null)"></i>
+						</p>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-2"><input type="text" placeholder="属性名称" ng-model="newKey" class="form-control"></label>
+					<div class="col-sm-9">
+						<div class="input-group">
+							<input type="text" class="form-control" placeholder="属性值" ng-model="newValue">
+							<span class="btn btn-default input-group-addon" ng-click="setMeta(newKey, newValue);  newKey = undefined; newValue = undefined">
+								<i class="fa fa-plus"></i>
+							</span>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-3 form form-horizontal">
+				<div class="form-group">
+					<label class="control-label col-sm-3">类型</label>
+					<div class="col-sm-9">
+						<select class="form-control" ng-model="post.type" ng-options="select as label for (select, label) in {'':'', 'event':'活动', 'article':'文章', 'image':'图片', 'audio':'音频', 'video':'视频', 'comment':'评论', 'partial':'片段', 'feedback':'反馈'}"></select>
+					</div>
+				</div>
+				<div class="form-group" ng-show="post.type === 'event'">
+					<label class="control-label col-sm-3">状态</label>
+					<div class="col-sm-9">
+						<select class="form-control" ng-model="post.status" ng-options="status for status in ['进行中', '已结束']"></select>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-sm-3">可见</label>
+					<div class="col-sm-9">
+						<select class="form-control" ng-model="post.visibility" ng-options="select as label for (select, label) in {'public':'公开','private':'私有'}"></select>
+					</div>
+				</div>
+				<div class="form-group" ng-show="post.type | in:['article','lesson','insight','course','topic','event']">
+					<label class="control-label col-sm-3">封面</label>
+					<div class="col-sm-9" ng-model="poster" ng-model-options="{allowInvalid:true}" ngf-drop ngf-select ngf-accept="'image/*'" ngf-drag-over-class="has-success">
+					<img ng-show="post.poster" ng-src="{{ post.poster.url }}" style="max-width:100%">
+					<button ng-show="!post.poster" ng-model="poster" ngf-select ngf-accept="'image/*'" class="btn btn-default">上传</button>
+				</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-sm-3">作者</label>
+					<div class="col-sm-9">
+						<input type="text" class="form-control" ng-model="post.author" typeahead="author as author.name for author in searchUser($viewValue)" typeahead-template-url="template/user/autocomplete.html">
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-sm-3">发布时间</label>
+					<div class="col-sm-9">
+						<input type="text" placeholder="日期时间" class="form-control" ng-model="post.created_at">
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-sm-3">更新时间</label>
+					<div class="col-sm-9">
+						<input type="text" placeholder="日期时间" class="form-control" ng-model="post.updated_at">
+					</div>
+				</div>
+				<div class="form-group" ng-show="post.type | in:['comment','question','answer','discussion','image','audio','record','article','lesson','insight']">
+					<label class="control-label col-sm-3">上级内容</label>
+					<div class="col-sm-9">
+						<div class="input-group">
+							<input type="text" class="form-control" ng-model="post.parent" typeahead="post as post.title || post.content | htmlToPlain | limitTo:20 for post in searchPost($viewValue)">
+							<div class="input-group-addon">
+								<a ng-href="http://qr-invite.qizhipeiyou.com/admin/post/{{ post.parent.id }}"><i class="fa fa-link"></i></a>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="form-group" ng-show="post.type | in:['event','course','article','lesson','topic','question','answer','discussion','record','comment']">
+					<label class="control-label col-sm-3">赞</label>
+					<div class="col-sm-9">
+						<input type="number" class="form-control" ng-model="post.likes">
+					</div>
+				</div>
+				<div class="form-group" ng-show="post.type | in:['event','course','article','lesson', 'insight','topic','question','answer','discussion','record']">
+					<label class="control-label col-sm-3">阅读</label>
+					<div class="col-sm-9">
+						<input type="number" class="form-control" ng-model="post.views">
+					</div>
+				</div>
+				<div class="form-group" ng-show="post.type | in:['event','course','article','lesson','insight','topic','question','answer','discussion','record']">
+					<label class="control-label col-sm-3">转发</label>
+					<div class="col-sm-9">
+						<input type="number" class="form-control" ng-model="post.reposts">
+					</div>
+				</div>
+				<div class="form-group" ng-show="post.type | in:['event','course','article','lesson','insight','topic','question','answer','discussion','record','comment']">
+					<label class="control-label col-sm-3">权重</label>
+					<div class="col-sm-9">
+						<input type="number" step="0.1" class="form-control" ng-model="post.weight">
+					</div>
+				</div>
+				<div class="form-group" ng-show="post.type | in:['event','course','article','lesson','insight','topic','question','magic']">
+					<label class="control-label col-sm-3">标签</label>
+					<div class="col-sm-9">
+						<p class="form-control-static" ng-show="post.tags.length">
+							<span class="label" ng-class="{'label-default':tag.is_hidden, 'label-info':!tag.is_hidden}" style="margin-right:5px;display:inline-block;" ng-repeat="tag in post.tags" ng-click="toggleTagHidden(tag)">
+								{{ tag.name }}
+								<i class="fa fa-close" ng-click="removeTag(tag)"></i>
+							</span>
+						</p>
+						<label><input type="checkbox" ng-model="newTagIsHidden"> 隐藏</label>
+						<div class="input-group">
+							<input type="text" class="form-control" ng-model="newTag" placeholder="新增标签" typeahead="tag.name as tag.name for tag in searchTag($viewValue)" typeahead-template-url="template/tag/autocomplete.html" typeahead-on-select="selectTag()" typeahead-no-results="noSearchResultsForTag" cip-enter="addTag(newTag, newTagIsHidden, true)" cip-esc="tagSearchIsOpen = false">
+							<span class="input-group-addon" ng-click="addTag(newTag, newTagIsHidden)"><i class="fa fa-plus"></i></span>
+						</div>
+					</div>
+				</div>
+				<div class="form-group" ng-show="post.type | in:['article','lesson','insight','course']">
+					<label class="control-label col-sm-3">相关内容</label>
+					<div class="col-sm-9">
+						<p class="form-control-static" ng-repeat="relative in post.related_posts">
+							<a ng-href="http://qr-invite.qizhipeiyou.com/post/{{ relative.id }}">{{ relative.title }}</a>
+							<i class="fa fa-arrow-up" ng-show="$index > 0" ng-click="moveUpRelatedPost(relative)"></i>
+							<i class="fa fa-close" ng-click="removeRelatedPost(relative)"></i>
+						</p>
+						<input type="text" class="form-control" ng-model="newRelative" placeholder="新增相关内容" typeahead="relative as relative.title for relative in searchPost($viewValue)" typeahead-on-select="addRelatedPost()">
+					</div>
+				</div>
+				<hr>
+				<div class="form-group">
+					<div class="col-sm-12">
+						<span ng-show="post.type | in:['article','insight','answer','discussion','record']">
+							<a ng-show="post.id" ng-href="post/new?type=comment&parent_id={{ post.id }}" class="btn btn-sm btn-default">添加评论</a>
+							<a ng-show="post.id" ng-href="post?type=comment&parent_id={{ post.id }}" class="btn btn-sm btn-default">查看评论</a>
+						</span>
+						<span ng-show="post.type | in:['event','course']">
+							<a ng-show="post.id" ng-href="post/new?type=question&parent_id={{ post.id }}" class="btn btn-sm btn-default">添加问题</a>
+							<a ng-show="post.id" ng-href="post?type=question&parent_id={{ post.id }}" class="btn btn-sm btn-default">查看问题</a>
+						</span>
+						<span ng-show="post.type === 'question'">
+							<a ng-show="post.id" ng-href="post/new?type=answer&parent_id={{ post.id }}" class="btn btn-sm btn-default">添加解答</a>
+							<a ng-show="post.id" ng-href="post?type=answer&parent_id={{ post.id }}" class="btn btn-sm btn-default">查看解答</a>
+							<a ng-show="post.id" ng-href="post?type=question&author_id={{ post.author.id }}" class="btn btn-sm btn-default">TA的问题</a>
+						</span>
+						<span ng-show="post.type === 'topic'">
+							<a ng-show="post.id" ng-href="post/new?type=discussion&parent_id={{ post.id }}" class="btn btn-sm btn-default">添加讨论</a>
+							<a ng-show="post.id" ng-href="post?type=discussion&parent_id={{ post.id }}" class="btn btn-sm btn-default">查看讨论</a>
+						</span>
+					</div>
+				</div>
+				<div class="col-sm-offset-2 text-right">
+					<button type="submit" class="btn btn-primary">保存</button>
+					<button type="button" class="btn btn-warning" ng-click="grant(post)" ng-show="post.type === 'course' && !granted()">授权</button>
+					<button type="button" class="btn btn-link" ng-click="remove(post)" ng-show="post.id">删除</button>
+				</div>
+			</div>
+			
+		</form>
+	</div>
+</div>

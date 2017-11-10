@@ -1,0 +1,138 @@
+<div class="row">
+	<div class="col-sm-12">
+		<br>
+		<form class="row" ng-submit="save(user)">
+			<div class="col-sm-9 form form-horizontal">
+				<div class="form-group">
+					<label class="control-label col-sm-2">用户名</label>
+					<div class="col-sm-9">
+						<input type="text" class="form-control" ng-model="user.name">
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-sm-2">姓名</label>
+					<div class="col-sm-9">
+						<input type="text" class="form-control" ng-model="user.realname">
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-sm-2">性别</label>
+					<div class="col-sm-9">
+						<label class="radio-inline">
+							<input type="radio" ng-model="user.gender" value="男">
+							男
+						</label>
+
+						<label class="radio-inline">
+							<input type="radio" ng-model="user.gender" value="女">
+							女
+						</label>
+
+						<label class="radio-inline">
+							<input type="radio" ng-model="user.gender" value="未知">
+							未知
+						</label>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-sm-2">手机</label>
+					<div class="col-sm-9">
+						<input type="text" class="form-control" ng-model="user.mobile">
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-sm-2">地区</label>
+					<div class="col-sm-9">
+						<input type="text" class="form-control" ng-model="user.address">
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-sm-2">角色</label>
+					<div class="col-sm-9">
+						<input type="text" class="form-control" ng-model="user.roles">
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-sm-2">重置密码</label>
+					<div class="col-sm-9">
+						<input type="text" ng-model="user.password" class="form-control">
+					</div>
+				</div>
+				<hr>
+				<div class="form-group" ng-repeat="profile in user.profiles" ng-if="profile.value !== null">
+					<label class="control-label col-sm-2" style="word-break:break-all" ng-click="setNewKey(profile.key)">{{ profile.key }}</label>
+					<div class="col-sm-7">
+						<p class="form-control-static">
+							{{ profile.value }}
+							<i class="fa fa-close pull-right" ng-click="setProfile(profile.key, null)"></i>
+						</p>
+					</div>
+					<div class="col-sm-2">
+                        <span ng-switch="profile.visibility">
+                            <span class="label label-danger" ng-switch-when="system">系统</span>
+                            <span class="label label-default" ng-switch-when="private">私有</span>
+                            <span class="label label-warning" ng-switch-when="protected">保护</span>
+                            <span class="label label-info" ng-switch-when="public">公开</span>
+                        </span>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-2"><input type="text" placeholder="资料名称" ng-model="newKey" class="form-control"></label>
+					<div class="col-sm-7">
+						<div class="input-group">
+							<input type="text" class="form-control" placeholder="资料内容" ng-model="newValue">
+							<span class="btn btn-default input-group-addon" ng-click="setProfile(newKey, newValue, newVisibility);  newKey = undefined; newValue = undefined">
+								<i class="fa fa-plus"></i>
+							</span>
+						</div>
+					</div>
+                    <div class="col-sm-2">
+                        <select class="form-control" ng-model="newVisibility" ng-options="value as label for (value, label) in {system:'系统',private:'私有',protected:'保护',public:'公开'}"></select>
+                    </div>
+				</div>
+			</div>
+			<div class="col-sm-3 form form-horizontal">
+				<div class="form-group">
+					<label class="control-label col-sm-3">头像</label>
+					<div class="col-sm-9" ng-model="avatar" ngf-drop ngf-select ngf-accept="'image/*'" ngf-drag-over-class="has-success">
+						<img ng-show="user.avatar" ng-src="{{ user.avatar }}" style="max-width:100%">
+						<button ng-show="!user.avatar && !avatar" ng-model="avatar" ngf-select ngf-accept="'image/*'" class="btn btn-default">上传</button>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-sm-3">专家达人</label>
+					<div class="col-sm-9">
+						<select class="form-control" ng-model="user.is_specialist" ng-options="value as key for (key , value) in {'专家':2,'达人':1,'普通用户':0,'禁言':-1}"></select>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-sm-3">发送消息</label>
+					<div class="col-sm-9">
+						<textarea type="text" class="form-control" placeholder="消息内容" ng-model="messageContent" style="margin-bottom:5px"></textarea>
+						<input type="text" class="form-control" placeholder="消息动作" ng-model="messageAction" style="margin-bottom:5px">
+						<input type="text" class="form-control" placeholder="消息事件" ng-model="messageEvent" style="margin-bottom:5px">
+						<button type="button" class="btn btn-default" ng-click="sendMessage()">发送</button>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-sm-offset-3 col-sm-9">
+						<div class="checkbox">
+							<label>
+								<input type="checkbox" ng-model="user.is_fake">
+								虚拟用户
+							</label>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<a ng-href="post?type=comment&author_id={{ user.id }}"><i class="fa fa-comments"></i> TA的评论</a>
+					<a ng-href="post?type=record&author_id={{ user.id }}"><i class="fa fa-credit-card"></i> TA的打卡</a>
+				</div>
+				<hr>
+				<div class="col-sm-offset-2">
+					<button type="submit" class="btn btn-primary">保存</button>
+				</div>
+			</div>
+		</form>
+	</div>
+</div>

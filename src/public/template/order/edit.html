@@ -1,0 +1,77 @@
+<div class="row">
+	<div class="col-sm-12">
+		<br>
+		<form class="form form-horizontal" ng-submit="save(order)">
+			<div class="form-group">
+				<label class="control-label col-sm-2">用户</label>
+				<div class="col-sm-6 form-control-static">
+					<a ng-href="user/{{ order.user.id }}">{{ order.user.name }}</a>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="control-label col-sm-2">联系方式</label>
+				<div class="col-sm-6" ng-show="isEditing('contact')">
+					<input type="text" class="form-control" ng-model="order.contact">
+				</div>
+				<div class="col-sm-6 form-control-static" ng-show="!isEditing('contact')">
+					{{ order.contact }}
+					<i class="fa fa-edit" ng-click="setEditing('contact')"></i>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="control-label col-sm-2">购买内容</label>
+				<div class="col-sm-6 form-control-static">
+					<p ng-show="order.posts.length" ng-repeat="post in order.posts"><a ng-href="post/{{ post.id }}">{{ post.title }}</a></p>
+					<p ng-show="order.membership">{{ order.membership_label }}</p>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="control-label col-sm-2">价格</label>
+				<div class="col-sm-6" ng-show="isEditing('price')">
+					<input type="text" class="form-control" ng-model="order.price">
+				</div>
+				<div class="col-sm-6 form-control-static" ng-show="!isEditing('price')">
+					{{ order.price }}
+					<i class="fa fa-edit" ng-click="setEditing('price')"></i>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="control-label col-sm-2">状态</label>
+				<div class="col-sm-6" ng-show="isEditing('status')">
+					<select class="form-control" ng-model="order.status" ng-options="select as label for (select, label) in {'pending':'待支付','paid':'已付款','in_group':'已入群','cancelled':'已取消','expired':'已超时','refund':'已退款'}"></select>
+				</div>
+				<div class="col-sm-6 form-control-static" ng-switch="order.status" ng-show="!isEditing('status')">
+					<span ng-switch-when="pending">待支付</span>
+					<span ng-switch-when="paid">已支付</span>
+					<span ng-switch-when="in_group">已入群</span>
+					<span ng-switch-when="cancelled">已取消</span>
+					<span ng-switch-when="expired">已超时</span>
+					<span ng-switch-when="refund">已退款</span>
+					<i class="fa fa-edit" ng-click="setEditing('status')"></i>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="control-label col-sm-2">支付信息</label>
+				<div class="col-sm-6 form-control-static" style="word-wrap:break-word">
+					{{ order.gateway }}
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="control-label col-sm-2">时间</label>
+				<div class="col-sm-6 form-control-static">
+					{{ order.created_at }}
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="control-label col-sm-2">备注</label>
+				<div class="col-sm-6">
+					<textarea class="form-control" ng-model="order.comment"></textarea>
+				</div>
+			</div>
+			<hr>
+			<div class="col-sm-offset-2">
+				<button type="submit" class="btn btn-primary">保存</button>
+			</div>
+		</form>
+	</div>
+</div>

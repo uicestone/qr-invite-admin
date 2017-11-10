@@ -1,0 +1,81 @@
+<div class="row">
+	<div class="col-sm-12">
+		<br>
+		<form class="row" ng-submit="save(task)" name="taskForm">
+			<div class="col-sm-8 form form-horizontal">
+				<div ng-show="task.type === '模板消息批量发送'">
+					<div class="form-group" ng-class="{'has-error':taskForm.taskValue.$error.json}">
+						<label class="control-label col-sm-2">微信号</label>
+						<div class="col-sm-10">
+							<select class="form-control" ng-model="task.data.mp_account" ng-options="account.name as account.label for account in wechat.accounts"></select>
+						</div>
+					</div>
+					<div class="form-group" ng-class="{'has-error':taskForm.taskValue.$error.json}">
+						<label class="control-label col-sm-2">模板</label>
+						<div class="col-sm-10">
+							<select class="form-control" ng-model="task.data.template_id" ng-options="template.template_id as template.title for template in wechat.templates"></select>
+						</div>
+					</div>
+					<div ng-show="task.data.template">
+						<div class="form-group" ng-class="{'has-error':taskForm.taskValue.$error.json}" ng-repeat="keyword in parseTemplateKeywords(task.data.template)">
+							<label class="control-label col-sm-2">{{ keyword }}</label>
+							<div class="col-sm-10">
+								<input type="text" class="form-control" ng-model="task.data.message_data[keyword]" ng-if="keyword | notIn:['first','remark']">
+								<textarea class="form-control" ng-model="task.data.message_data[keyword]" ng-if="keyword | in:['first','remark']"></textarea>
+							</div>
+						</div>
+						<div class="form-group" ng-class="{'has-error':taskForm.taskValue.$error.json}">
+							<label class="control-label col-sm-2">链接</label>
+							<div class="col-sm-10">
+								<input type="text" class="form-control" ng-model="task.data.message_url">
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="control-label col-sm-2">模板结构</label>
+							<div class="col-sm-10">
+								<pre>{{ task.data.template.content }}</pre>
+							</div>
+						</div>
+					</div>
+					<div class="form-group" ng-class="{'has-error':taskForm.taskValue.$error.json}">
+						<label class="control-label col-sm-2">用户</label>
+						<div class="col-sm-10">
+							<textarea class="form-control" ng-model="task.data.user_ids"></textarea>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-4 form form-horizontal">
+				<div class="form-group">
+					<label class="control-label col-sm-3">编号/状态</label>
+					<div class="col-sm-9">
+						<p class="form-control-static">{{ task.id }} / {{ task.status }}</p>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-sm-3">类型</label>
+					<div class="col-sm-9">
+						<select class="form-control" ng-model="task.type" ng-options="type for type in ['模板消息批量发送']"></select>
+					</div>
+				</div>
+				<div class="form-group" ng-class="{'has-error':taskForm.taskValue.$error.json}">
+					<label class="control-label col-sm-3">开始时间</label>
+					<div class="col-sm-9">
+						<input type="text" class="form-control" ng-model="task.starts_at">
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-sm-3">备注</label>
+					<div class="col-sm-9">
+						<textarea rows="7" class="form-control" ng-model="task.comments"></textarea>
+					</div>
+				</div>
+				<hr>
+				<div class="col-sm-offset-2">
+					<button type="submit" class="btn btn-primary">保存</button>
+					<button type="button" class="btn btn-default" ng-show="task.type==='模板消息批量发送'" ng-click="task.data.run_test=true;save(task)">测试</button>
+				</div>
+			</div>
+		</form>
+	</div>
+</div>

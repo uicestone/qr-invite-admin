@@ -1,0 +1,105 @@
+<div class="row">
+	<br>
+	<div class="col-sm-12">
+		<form class="form-inline" style="display:inline" ng-submit="location.search(queryArgs)">
+			<div class="form-group">
+				<div class="input-group">
+					<span class="input-group-addon">搜索</span>
+					<input type="text" class="form-control input-sm" ng-model="queryArgs.code" placeholder="验证码" style="width:63px">
+				</div>
+			</div>
+			<div class="form-group">
+				<input type="text" placeholder="渠道名/用户ID" class="form-control input-sm" style="width:100px;" ng-model="queryArgs.source" />
+			</div>
+			<div class="form-group">
+				<div class="input-group">
+					<input type="text" class="form-control input-sm" ng-model="queryArgs.created_after" placeholder="自" style="width:90px">
+					<span class="input-group-addon">-</span>
+					<input type="text" class="form-control input-sm" ng-model="queryArgs.created_before" placeholder="至" style="width:90px">
+				</div>
+			</div>
+
+			<div class="form-group">
+				<input type="text" placeholder="用户" class="form-control input-sm" ng-model="queryArgs.user_id" typeahead="user.id as user.name for user in searchUser($viewValue)" typeahead-template-url="template/user/autocomplete.html" style="width:70px">
+			</div>
+			<div class="form-group">
+				<div class="input-group">
+					<input type="text" placeholder="内容" class="form-control input-sm" ng-model="queryArgs.post_id" typeahead="post.id as post.title || post.content | htmlToPlain | limitTo:20 for post in searchPost($viewValue)" style="width:70px">
+					<span class="input-group-btn">
+						<button class="btn btn-default btn-sm" type="submit">
+							<i class="fa fa-search"></i>
+						</button>
+					</span>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<select class="form-control input-sm" ng-model="queryArgs.type" ng-options="select as label for (select, label) in {'membership':'会员','post':'课程', 'future-school':'学籍'}" ng-change="location.search(queryArgs)">
+					<option value="">类型</option>
+				</select>
+				<select class="form-control input-sm" ng-model="queryArgs.status" ng-options="select as label for (select, label) in {'success':'成功','failed':'失败','pending':'待支付','paid':'已付款','cancelled':'已取消','expired':'已超时','refund':'已退款'}" ng-change="location.search(queryArgs)">
+					<option value="">状态</option>
+				</select>
+			</div>
+		</form>
+
+		<div class="paginator text-right">
+			¥{{ priceSum | number:0 }}
+			/
+			{{ itemsStart }} - {{ itemsEnd }} / {{ itemsTotal }}
+			<button class="btn btn-default fa fa-refresh" ng-click="refresh()"></button>
+			<button class="btn btn-default fa fa-chevron-left" ng-click="previousPage()" ng-disabled="!currentPage || currentPage === 1"></button>
+			<button class="btn btn-default fa fa-chevron-right" ng-click="nextPage()" ng-disabled="itemsEnd >= itemsTotal"></button>
+		</div>
+	</div>
+</div>
+<hr>
+<div class="row">
+	<div class="col-sm-12">
+		<table class="table table-striped table-hover">
+			<thead>
+				<tr>
+					<th style="width:60px">订单号</th>
+					<th style="width:150px">用户</th>
+					<th style="width:90px">价格</th>
+					<th style="width:60px">状态</th>
+					<th style="width:120px">渠道</th>
+					<th style="width:150px">时间</th>
+					<th style="width:100px">联系方式</th>
+					<th>购买内容</th>
+					<th style="width:60px">验证码</th>
+					<th style="width:90px">操作</th>
+					<th>备注</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr ng-repeat="order in orders" ng-click="editOrder(order, $event)">
+					<td>{{ order.id }}</td>
+					<td><a ng-href="user/{{ order.user.id }}" ng-click="$event.stopPropagation()">{{ order.user.name }}</a></td>
+					<td>{{ order.price }}</td>
+					<td ng-switch="order.status">
+						<span class="cip-red" ng-switch-when="pending">待支付</span>
+						<span class="cip-green" ng-switch-when="paid">已支付</span>
+						<span class="cip-grey" ng-switch-when="cancelled">已取消</span>
+						<span class="cip-grey" ng-switch-when="expired">已超时</span>
+						<span ng-switch-when="refund">已退款</span>
+						<span class="cip-blue" ng-switch-when="in_group">已入群</span>
+					</td>
+					<td class="ellipsis"><a ng-show="order.source.user" ng-href="user/{{order.source.user_id}}">{{order.source.user.name}}</a> {{ order.source.channel }}</td>
+					<td>{{ order.created_at }}</td>
+					<td>{{ order.contact }}</td>
+					<td class="ellipsis">
+						<span ng-show="order.membership">{{ order.membership_label }}</span>
+						<span ng-show="order.order_type == 6">{{ order.name}}</span>
+						<a ng-show="order.posts.length" ng-href="post/{{ order.posts[0].id }}" ng-click="$event.stopPropagation()" title="{{ order.posts[0].title }}">{{ order.posts[0].title }}</a>
+					</td>
+					<td>{{ order.code }}</td>
+					<td>
+						<button class="btn btn-default btn-xs" ng-show="order.status === 'paid'" ng-click="$event.stopPropagation();addToWeixinGroup(order)">入群</button>
+					</td>
+					<td class="ellipsis" title="{{ order.comment }}">{{ order.comment }}</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
