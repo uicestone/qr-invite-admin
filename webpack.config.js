@@ -46,7 +46,7 @@ module.exports = function makeWebpackConfig () {
 
     // Output path from the view of the page
     // Uses webpack-dev-server in development
-    publicPath: isBuild ? '' : 'http://localhost:8080/',
+    publicPath: isBuild ? '/admin/' : 'http://localhost:8080/',
 
     // Filename for entry points
     // Only adds hash in build mode
@@ -161,7 +161,8 @@ module.exports = function makeWebpackConfig () {
       new HtmlWebpackPlugin({
         template: './src/public/index.ejs',
         inject: 'head',
-        apiBase: ENV === 'build' ? 'http://qr-invite.qizhipeiyou.com/' : (ENV === 'test-build' ? 'http://test-qr-invite.qizhipeiyou.com/' : 'http://localhost:8000/api/'),
+        publicBase: '/admin/',
+        apiBase: ENV === 'build' ? 'http://qr-invite.qizhipeiyou.com/api/' : (ENV === 'test-build' ? 'http://test-qr-invite.qizhipeiyou.com/api/' : 'http://localhost:8000/api/'),
         webSocketUrl: ENV === 'build' ? 'http://qr-invite.qizhipeiyou.com:6001' : (ENV === 'test-build' ? 'http://test-qr-invite.qizhipeiyou.com:6001' : null)
       }),
 
